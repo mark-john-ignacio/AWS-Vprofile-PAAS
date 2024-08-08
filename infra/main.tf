@@ -1,31 +1,3 @@
-data "http" "my_ip" {
-  url = "http://checkip.amazonaws.com/"
-}
-
-data "aws_vpc" "default" {
-  id = "vpc-048c313786f7c4c19"
-  default = true
-}
-
-data "aws_availability_zones" "available" {
-  state = "available"
-  filter {
-    name = "region-name"
-    values = ["us-east-1"]
-  }
-}
-
-data "aws_subnets" "all" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.default.id]
-  }
-  filter {
-    name = "availability-zone"
-    values = data.aws_availability_zones.available.names
-  }
-}
-
 resource "tls_private_key" "vprofile-bean-key" {
   algorithm = "RSA"
   rsa_bits  = 2048
@@ -115,6 +87,11 @@ resource "random_password" "rds_password" {
   special = true
 }
 
+resource "local_file" "rds_password_file" {
+  content  = random_password.rds_password.result
+  filename = "${path.module}/key/rds_password.txt"
+}
+
 resource "aws_iam_role" "rds_monitoring" {
   name = "rds-monitoring-role"
 
@@ -130,4 +107,36 @@ resource "aws_iam_role" "rds_monitoring" {
       }
     ]
   })
+}
+
+resource "aws_iam_role_policy_attachment" "rds_monitoring" {
+  role       = aws_iam_role.rds_monitoring.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"
+}
+
+resource "aws_elasticache_subnet_group" "vprofile-memcached-sub-group" {
+  name       = "vprofile-memcached-sub-group"
+  description = "Subnet group for vprofile memcached"
+  subnet_ids = data.aws_subnets.all.ids
+}
+
+resource "aws_elasticache_parameter_group" "vprofile-memcached-para-grp" {
+  name   = "vprofile-memcached-para-grp"
+  family = "memcached1.6"
+}
+
+resource "aws_elasticache_cluster" "vprofile-elasticache-svc" {
+  cluster_id           = "vprofile-elasticache-svc"
+  engine               = "memcached"
+  engine_version       = "1.6.17"
+  node_type            = "cache.t2.micro"
+  num_cache_nodes      = 1
+  parameter_group_name = aws_elasticache_parameter_group.vprofile-memcached-para-grp.name
+  subnet_group_name    = aws_elasticache_subnet_group.vprofile-memcached-sub-group.name
+  security_group_ids   = [aws_security_group.vprofile-backend-SG.id]
+
+  tags = {
+    Name        = "vprofile-elasticache-svc"
+    Description = "ElastiCache cluster for vprofile"
+  }
 }
