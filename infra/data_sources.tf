@@ -25,3 +25,7 @@ data "aws_subnets" "all" {
     values = data.aws_availability_zones.available.names
   }
 }
+
+data "aws_subnet" "single" {
+  id = data.aws_subnets.all.ids[0]  # Manually specify one subnet from the list
+}

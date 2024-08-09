@@ -66,6 +66,7 @@ resource "aws_db_instance" "vprofile-rds-mysql" {
   monitoring_role_arn     = aws_iam_role.rds_monitoring.arn
   parameter_group_name    = aws_db_parameter_group.vprofile-para-grp.name
   apply_immediately       = true
+  skip_final_snapshot     = true
 
   db_name                    = "accounts"
   username                = "admin"
@@ -139,4 +140,38 @@ resource "aws_elasticache_cluster" "vprofile-elasticache-svc" {
     Name        = "vprofile-elasticache-svc"
     Description = "ElastiCache cluster for vprofile"
   }
+}
+
+resource "random_password" "rabbitmq_password" {
+  length  = 16
+  special = true
+}
+
+resource "aws_mq_broker" "vprofile-rmq" {
+  broker_name           = "vprofile-rmq"
+  engine_type           = "RabbitMQ"
+  engine_version        = "3.13"
+  host_instance_type    = "mq.t3.micro"
+  publicly_accessible   = false
+  security_groups       = [aws_security_group.vprofile-backend-SG.id]
+  subnet_ids            = [data.aws_subnet.single.id]
+  auto_minor_version_upgrade = true
+
+  user {
+    username = "rabbit"
+    password = random_password.rabbitmq_password.result
+  }
+
+  logs {
+    general = true
+  }
+
+  tags = {
+    Name = "vprofile-rmq"
+  }
+}
+
+resource "local_file" "rabbitmq_password_file" {
+  content  = random_password.rabbitmq_password.result
+  filename = "${path.module}/key/rabbitmq_password.txt"
 }
