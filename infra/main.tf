@@ -175,3 +175,39 @@ resource "local_file" "rabbitmq_password_file" {
   content  = random_password.rabbitmq_password.result
   filename = "${path.module}/key/rabbitmq_password.txt"
 }
+
+# Create an EC2 instance
+resource "aws_instance" "sql_executor" {
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = "t2.micro"
+  key_name      = aws_key_pair.vprofile-bean-key.key_name
+  subnet_id     = data.aws_subnet.single.id
+  security_groups = [aws_security_group.vprofile-backend-SG.id]
+
+  provisioner "file" {
+    source      = "sql/db_backup.sql"
+    destination = "/tmp/file.sql"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "mysql -h ${aws_db_instance.vprofile-rds-mysql.address} -u ${aws_db_instance.vprofile-rds-mysql.username} -p${random_password.rds_password.result} ${aws_db_instance.vprofile-rds-mysql.db_name} < /tmp/file.sql"
+    ]
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = file("${path.module}/key/vprofile-bean-key.pem")
+      host        = self.public_ip
+    }
+  }
+
+  tags = {
+    Name = "sql-executor"
+  }
+}
+
+# Ensure the EC2 instance is created after the RDS instance
+resource "null_resource" "execute_sql" {
+  depends_on = [aws_instance.sql_executor]
+}
