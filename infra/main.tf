@@ -24,6 +24,20 @@ resource "aws_security_group" "vprofile-backend-SG" {
     protocol = "-1"
     self = true
   }
+
+  ingress {
+    from_port = 3306
+    to_port = 3306
+    protocol = "tcp"
+    security_groups = [aws_security_group.mysql-client-sg.id]
+  }
+
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
 resource "aws_db_subnet_group" "vprofile-rds-sub-grp" {
@@ -182,7 +196,7 @@ resource "aws_instance" "sql_executor" {
   instance_type = "t2.micro"
   key_name      = aws_key_pair.vprofile-bean-key.key_name
   subnet_id     = data.aws_subnet.single.id
-  security_groups = [aws_security_group.vprofile-backend-SG.id]
+  vpc_security_group_ids = [aws_security_group.mysql-client-sg.id]
 
   provisioner "file" {
     source      = "sql/db_backup.sql"
@@ -197,7 +211,7 @@ resource "aws_instance" "sql_executor" {
     connection {
       type        = "ssh"
       user        = "ubuntu"
-      private_key = file("${path.module}/key/vprofile-bean-key.pem")
+      private_key = file(local_file.private-key.filename)
       host        = self.public_ip
     }
   }
@@ -205,9 +219,26 @@ resource "aws_instance" "sql_executor" {
   tags = {
     Name = "sql-executor"
   }
+
+  depends_on = [ aws_db_instance.vprofile-rds-mysql, local_file.private-key ]
 }
 
-# Ensure the EC2 instance is created after the RDS instance
-resource "null_resource" "execute_sql" {
-  depends_on = [aws_instance.sql_executor]
+
+resource "aws_security_group" "mysql-client-sg" {
+  name = "mysql-client-sg"
+  description = "Security group for MySQL client"
+
+   ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["${trimspace(data.http.my_ip.response_body)}/32"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  } 
 }
