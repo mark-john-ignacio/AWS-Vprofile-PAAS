@@ -191,51 +191,51 @@ resource "local_file" "rabbitmq_password_file" {
   filename = "${path.module}/key/rabbitmq_password.txt"
 }
 
-# resource "aws_instance" "sql_executor" {
-#   ami           = data.aws_ami.ubuntu.id
-#   instance_type = "t2.micro"
-#   key_name      = aws_key_pair.vprofile-bean-key.key_name
-#   subnet_id     = data.aws_subnet.single.id
-#   vpc_security_group_ids = [aws_security_group.mysql-client-sg.id]
+resource "aws_instance" "sql_executor" {
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = "t2.micro"
+  key_name      = aws_key_pair.vprofile-bean-key.key_name
+  subnet_id     = data.aws_subnet.single.id
+  vpc_security_group_ids = [aws_security_group.mysql-client-sg.id]
 
-#   provisioner "file" {
-#     source      = "sql/db_backup.sql"
-#     destination = "/tmp/file.sql"
+  provisioner "file" {
+    source      = "sql/db_backup.sql"
+    destination = "/tmp/file.sql"
 
-#     connection {
-#       type        = "ssh"
-#       user        = "ubuntu"
-#       private_key = file(local_file.private-key.filename)
-#       host        = self.public_ip
-#     }
-#   }
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = file(local_file.private-key.filename)
+      host        = self.public_ip
+    }
+  }
 
-#   provisioner "remote-exec" {
-#     inline = [
-#       "sudo apt-get update -y",
-#       "sudo apt-get install -y mysql-client",
-#       "mysql -h ${aws_db_instance.vprofile-rds-mysql.address} -u ${aws_db_instance.vprofile-rds-mysql.username} -p${random_password.rds_password.result} ${aws_db_instance.vprofile-rds-mysql.db_name} < /tmp/file.sql",
-#       "mysql -h ${aws_db_instance.vprofile-rds-mysql.address} -u ${aws_db_instance.vprofile-rds-mysql.username} -p${random_password.rds_password.result} -e 'SHOW TABLES;' ${aws_db_instance.vprofile-rds-mysql.db_name} > /tmp/sql_output.txt"
-#     ]
+  provisioner "remote-exec" {
+    inline = [
+      "sudo apt-get update -y",
+      "sudo apt-get install -y mysql-client",
+      "mysql -h ${aws_db_instance.vprofile-rds-mysql.address} -u ${aws_db_instance.vprofile-rds-mysql.username} -p${random_password.rds_password.result} ${aws_db_instance.vprofile-rds-mysql.db_name} < /tmp/file.sql",
+      "mysql -h ${aws_db_instance.vprofile-rds-mysql.address} -u ${aws_db_instance.vprofile-rds-mysql.username} -p${random_password.rds_password.result} -e 'SHOW TABLES;' ${aws_db_instance.vprofile-rds-mysql.db_name} > /tmp/sql_output.txt"
+    ]
 
-#     connection {
-#       type        = "ssh"
-#       user        = "ubuntu"
-#       private_key = file(local_file.private-key.filename)
-#       host        = self.public_ip
-#     }
-#   }
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = file(local_file.private-key.filename)
+      host        = self.public_ip
+    }
+  }
 
-#   provisioner "local-exec" {
-#     command = "scp -i ${local_file.private-key.filename} ubuntu@${self.public_ip}:/tmp/sql_output.txt ./sql_output.txt"
-#   }
+  provisioner "local-exec" {
+    command = "scp -i ${local_file.private-key.filename} ubuntu@${self.public_ip}:/tmp/sql_output.txt sql/sql_output.txt"
+  }
 
-#   tags = {
-#     Name = "sql-executor"
-#   }
+  tags = {
+    Name = "sql-executor"
+  }
 
-#   depends_on = [aws_db_instance.vprofile-rds-mysql, local_file.private-key]
-# }
+  depends_on = [aws_db_instance.vprofile-rds-mysql, local_file.private-key]
+}
 
 
 resource "aws_security_group" "mysql-client-sg" {
@@ -255,4 +255,41 @@ resource "aws_security_group" "mysql-client-sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   } 
+}
+// Beanstalk role
+resource "aws_iam_role" "vprofile_bean_role" {
+  name = "vprofile-bean-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "vprofile_bean_role_attach_1" {
+  role       = aws_iam_role.vprofile_bean_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSElasticBeanstalkWebTier"
+}
+
+resource "aws_iam_role_policy_attachment" "vprofile_bean_role_attach_2" {
+  role       = aws_iam_role.vprofile_bean_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess-AWSElasticBeanstalk"
+}
+
+resource "aws_iam_role_policy_attachment" "vprofile_bean_role_attach_3" {
+  role       = aws_iam_role.vprofile_bean_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSElasticBeanstalkRoleSNS"
+}
+
+resource "aws_iam_role_policy_attachment" "vprofile_bean_role_attach_4" {
+  role       = aws_iam_role.vprofile_bean_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSElasticBeanstalkCustomPlatformforEC2Role"
 }
