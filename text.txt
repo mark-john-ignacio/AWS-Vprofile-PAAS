@@ -1,0 +1,72 @@
+create application beanstalk
+Environment tier: Web server environment
+Application Name:vprofile-app
+Environment Information: 
+Environment Name: vprofile-app-prod
+Domain:vprofile-markabc123
+
+Platform
+Tomcat
+Platform Branch: Tomcat 8.5 with Correto 11
+Application code: Sampla Application
+Presets: Custom configuration
+
+Service Access
+EC2 Instance Profile: vprofile-bean-role
+
+Service Role:
+Create and use new service role
+EC2 key pair - vprofile-bean-key
+
+VPC
+default
+
+Instance settings
+Public IP address:activated
+
+subnet-zones
+us-east-1a
+us-east-1b
+us-east-1c
+us-east-1d
+us-east-1f
+
+Tag:
+Name: vproapp
+Project: vprofile-saas
+
+Root volume type: container default
+
+Auto scaling group
+Environment Type: Load balanced
+Instances:
+Min:2
+Max:8
+
+Instance Types: t3.micro only
+AMI ID: default
+
+Scaling Trigger
+Network Out
+Statistic: Average
+
+Unit 
+Bytes
+
+Period 5
+Breach duration 5
+
+Load Balancer Network Settings
+visibility: Public
+Subnets: us-east-1a
+us-east-1b
+us-east-1c
+us-east-1d
+us-east-1f
+
+Load Balancer Type
+Application Load Balancer
+
+Monitoring
+Health Reporting
+Enhanced
