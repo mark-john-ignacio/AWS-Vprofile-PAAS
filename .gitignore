@@ -28,4 +28,3 @@ infra/.terraform.lock.hcl
 infra/text.txt
 
 infra/key/*
-infra/provider.tf
