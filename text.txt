@@ -70,3 +70,8 @@ Application Load Balancer
 Monitoring
 Health Reporting
 Enhanced
+
+Rolling updates and deployments 
+Deployment Policy Rolling
+Batch size: Percentage
+50 percent instance at a time

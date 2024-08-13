@@ -284,12 +284,153 @@ resource "aws_iam_role_policy_attachment" "vprofile_bean_role_attach_2" {
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess-AWSElasticBeanstalk"
 }
 
-resource "aws_iam_role_policy_attachment" "vprofile_bean_role_attach_3" {
-  role       = aws_iam_role.vprofile_bean_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AWSElasticBeanstalkRoleSNS"
-}
 
 resource "aws_iam_role_policy_attachment" "vprofile_bean_role_attach_4" {
   role       = aws_iam_role.vprofile_bean_role.name
   policy_arn = "arn:aws:iam::aws:policy/AWSElasticBeanstalkCustomPlatformforEC2Role"
+}
+
+# Define the Elastic Beanstalk Application
+resource "aws_elastic_beanstalk_application" "vprofile_app" {
+  name        = "vprofile-app"
+  description = "vprofile application"
+}
+
+# Define the Elastic Beanstalk Environment
+resource "aws_elastic_beanstalk_environment" "vprofile_app_prod" {
+  name                = "vprofile-app-prod"
+  application         = aws_elastic_beanstalk_application.vprofile_app.name
+  solution_stack_name = "64bit Amazon Linux 2023 v4.3.0 running Corretto 21"
+  cname_prefix        = "vprofile-app-prod"
+
+  setting {
+    namespace = "aws:autoscaling:launchconfiguration"
+    name      = "IamInstanceProfile"
+    value     = "vprofile-bean-role"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:launchconfiguration"
+    name      = "EC2KeyName"
+    value     = "vprofile-bean-key"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:asg"
+    name      = "MinSize"
+    value     = "2"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:asg"
+    name      = "MaxSize"
+    value     = "8"
+  }
+
+  setting {
+    namespace = "aws:ec2:vpc"
+    name      = "VPCId"
+    value     = "vpc-12345678" # Replace with your VPC ID
+  }
+
+  setting {
+    namespace = "aws:ec2:vpc"
+    name      = "Subnets"
+    value     = "subnet-12345678,subnet-23456789,subnet-34567890,subnet-45678901,subnet-56789012" # Replace with your Subnet IDs
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:environment"
+    name      = "EnvironmentType"
+    value     = "LoadBalanced"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:environment"
+    name      = "ServiceRole"
+    value     = "aws-elasticbeanstalk-service-role"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "EnvironmentVariables"
+    value     = "Name=vproapp,Project=vprofile-saas"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:healthreporting:system"
+    name      = "SystemType"
+    value     = "enhanced"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:command"
+    name      = "DeploymentPolicy"
+    value     = "Rolling"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:command"
+    name      = "BatchSize"
+    value     = "50"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:command"
+    name      = "BatchSizeType"
+    value     = "Percentage"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:default"
+    name      = "HealthCheckPath"
+    value     = "/"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:default"
+    name      = "Port"
+    value     = "80"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:default"
+    name      = "Protocol"
+    value     = "HTTP"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:default"
+    name      = "StickinessEnabled"
+    value     = "true"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:default"
+    name      = "StickinessLBCookieDuration"
+    value     = "86400"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:default"
+    name      = "LoadBalancerType"
+    value     = "application"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:default"
+    name      = "LoadBalancerIsPublic"
+    value     = "true"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:default"
+    name      = "LoadBalancerSubnets"
+    value     = "subnet-12345678,subnet-23456789,subnet-34567890,subnet-45678901,subnet-56789012" # Replace with your Subnet IDs
+  }
+
+  tags = {
+    Name    = "vproapp"
+    Project = "vprofile-saas"
+  }
 }
