@@ -256,6 +256,35 @@ resource "aws_security_group" "mysql-client-sg" {
     cidr_blocks = ["0.0.0.0/0"]
   } 
 }
+
+resource "aws_iam_role" "elasticbeanstalk_service_role" {
+  name = "aws-elasticbeanstalk-service-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "elasticbeanstalk.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+# Attach the necessary policies to the service role
+resource "aws_iam_role_policy_attachment" "elasticbeanstalk_service_role_policy" {
+  role       = aws_iam_role.elasticbeanstalk_service_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSElasticBeanstalkEnhancedHealth"
+}
+
+resource "aws_iam_role_policy_attachment" "elasticbeanstalk_service_role_policy_2" {
+  role       = aws_iam_role.elasticbeanstalk_service_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSElasticBeanstalkService"
+}
+
 // Beanstalk role
 resource "aws_iam_role" "vprofile_bean_role" {
   name = "vprofile-bean-role"
@@ -304,7 +333,7 @@ resource "aws_elastic_beanstalk_application" "vprofile_app" {
 resource "aws_elastic_beanstalk_environment" "vprofile_app_prod" {
   name                = "vprofile-app-prod"
   application         = aws_elastic_beanstalk_application.vprofile_app.name
-  solution_stack_name = "64bit Amazon Linux 2023 v4.3.0 running Corretto 21"
+  solution_stack_name = "64bit Amazon Linux 2023 v4.3.0 running Corretto 11"
   cname_prefix        = "vprofile-mark-abc123"
 
   setting {
@@ -353,7 +382,7 @@ resource "aws_elastic_beanstalk_environment" "vprofile_app_prod" {
   setting {
     namespace = "aws:elasticbeanstalk:environment"
     name      = "ServiceRole"
-    value     = "aws-elasticbeanstalk-service-role"
+    value     = aws_iam_role.elasticbeanstalk_service_role.arn
   }
 
   setting {
