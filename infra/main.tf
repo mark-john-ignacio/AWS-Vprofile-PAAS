@@ -427,7 +427,7 @@ resource "aws_elastic_beanstalk_environment" "vprofile_app_prod" {
   setting {
     namespace = "aws:elasticbeanstalk:environment:process:default"
     name      = "LoadBalancerSubnets"
-    value     = join(",", data.aws_subnets.all.ids)
+    value     = join(",", [for id in data.aws_subnets.all.ids : id if id != data.aws_subnet.exclude.id])
    }
 
   tags = {
