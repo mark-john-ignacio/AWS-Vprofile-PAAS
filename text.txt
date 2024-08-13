@@ -3,7 +3,7 @@ Environment tier: Web server environment
 Application Name:vprofile-app
 Environment Information: 
 Environment Name: vprofile-app-prod
-Domain:vprofile-markabc123
+subDomain:vprofile-markabc123
 
 Platform
 Tomcat

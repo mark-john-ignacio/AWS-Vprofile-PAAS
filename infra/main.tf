@@ -64,38 +64,38 @@ resource "aws_db_parameter_group" "vprofile-para-grp" {
   
 }
 
-resource "aws_db_instance" "vprofile-rds-mysql" {
-  identifier              = "vprofile-rds-mysql"
-  engine                  = "mysql"
-  engine_version          = "8.0.32"
-  instance_class          = "db.t3.micro"
-  allocated_storage       = 20
-  storage_type            = "gp2"
-  db_subnet_group_name    = aws_db_subnet_group.vprofile-rds-sub-grp.name
-  vpc_security_group_ids  = [aws_security_group.vprofile-backend-SG.id]
-  publicly_accessible     = false
-  auto_minor_version_upgrade = true
-  backup_retention_period = 7
-  monitoring_interval     = 60
-  monitoring_role_arn     = aws_iam_role.rds_monitoring.arn
-  parameter_group_name    = aws_db_parameter_group.vprofile-para-grp.name
-  apply_immediately       = true
-  skip_final_snapshot     = true
+# resource "aws_db_instance" "vprofile-rds-mysql" {
+#   identifier              = "vprofile-rds-mysql"
+#   engine                  = "mysql"
+#   engine_version          = "8.0.32"
+#   instance_class          = "db.t3.micro"
+#   allocated_storage       = 20
+#   storage_type            = "gp2"
+#   db_subnet_group_name    = aws_db_subnet_group.vprofile-rds-sub-grp.name
+#   vpc_security_group_ids  = [aws_security_group.vprofile-backend-SG.id]
+#   publicly_accessible     = false
+#   auto_minor_version_upgrade = true
+#   backup_retention_period = 7
+#   monitoring_interval     = 60
+#   monitoring_role_arn     = aws_iam_role.rds_monitoring.arn
+#   parameter_group_name    = aws_db_parameter_group.vprofile-para-grp.name
+#   apply_immediately       = true
+#   skip_final_snapshot     = true
 
-  db_name                    = "accounts"
-  username                = "admin"
-  password                = random_password.rds_password.result
+#   db_name                    = "accounts"
+#   username                = "admin"
+#   password                = random_password.rds_password.result
 
-  tags = {
-    Name = "vprofile-rds-mysql"
-  }
+#   tags = {
+#     Name = "vprofile-rds-mysql"
+#   }
 
-  lifecycle {
-    create_before_destroy = true
-  }
+#   lifecycle {
+#     create_before_destroy = true
+#   }
 
-  depends_on = [aws_iam_role_policy_attachment.rds_monitoring]
-}
+#   depends_on = [aws_iam_role_policy_attachment.rds_monitoring]
+# }
 
 resource "random_password" "rds_password" {
   length  = 16
@@ -165,7 +165,7 @@ resource "random_password" "rabbitmq_password" {
 resource "aws_mq_broker" "vprofile-rmq" {
   broker_name           = "vprofile-rmq"
   engine_type           = "RabbitMQ"
-  engine_version        = "3.13"
+  engine_version        = "3.13.6"
   host_instance_type    = "mq.t3.micro"
   publicly_accessible   = false
   security_groups       = [aws_security_group.vprofile-backend-SG.id]
@@ -191,51 +191,51 @@ resource "local_file" "rabbitmq_password_file" {
   filename = "${path.module}/key/rabbitmq_password.txt"
 }
 
-resource "aws_instance" "sql_executor" {
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = "t2.micro"
-  key_name      = aws_key_pair.vprofile-bean-key.key_name
-  subnet_id     = data.aws_subnet.single.id
-  vpc_security_group_ids = [aws_security_group.mysql-client-sg.id]
+# resource "aws_instance" "sql_executor" {
+#   ami           = data.aws_ami.ubuntu.id
+#   instance_type = "t2.micro"
+#   key_name      = aws_key_pair.vprofile-bean-key.key_name
+#   subnet_id     = data.aws_subnet.single.id
+#   vpc_security_group_ids = [aws_security_group.mysql-client-sg.id]
 
-  provisioner "file" {
-    source      = "sql/db_backup.sql"
-    destination = "/tmp/file.sql"
+#   provisioner "file" {
+#     source      = "sql/db_backup.sql"
+#     destination = "/tmp/file.sql"
 
-    connection {
-      type        = "ssh"
-      user        = "ubuntu"
-      private_key = file(local_file.private-key.filename)
-      host        = self.public_ip
-    }
-  }
+#     connection {
+#       type        = "ssh"
+#       user        = "ubuntu"
+#       private_key = file(local_file.private-key.filename)
+#       host        = self.public_ip
+#     }
+#   }
 
-  provisioner "remote-exec" {
-    inline = [
-      "sudo apt-get update -y",
-      "sudo apt-get install -y mysql-client",
-      "mysql -h ${aws_db_instance.vprofile-rds-mysql.address} -u ${aws_db_instance.vprofile-rds-mysql.username} -p${random_password.rds_password.result} ${aws_db_instance.vprofile-rds-mysql.db_name} < /tmp/file.sql",
-      "mysql -h ${aws_db_instance.vprofile-rds-mysql.address} -u ${aws_db_instance.vprofile-rds-mysql.username} -p${random_password.rds_password.result} -e 'SHOW TABLES;' ${aws_db_instance.vprofile-rds-mysql.db_name} > /tmp/sql_output.txt"
-    ]
+#   provisioner "remote-exec" {
+#     inline = [
+#       "sudo apt-get update -y",
+#       "sudo apt-get install -y mysql-client",
+#       "mysql -h ${aws_db_instance.vprofile-rds-mysql.address} -u ${aws_db_instance.vprofile-rds-mysql.username} -p${random_password.rds_password.result} ${aws_db_instance.vprofile-rds-mysql.db_name} < /tmp/file.sql",
+#       "mysql -h ${aws_db_instance.vprofile-rds-mysql.address} -u ${aws_db_instance.vprofile-rds-mysql.username} -p${random_password.rds_password.result} -e 'SHOW TABLES;' ${aws_db_instance.vprofile-rds-mysql.db_name} > /tmp/sql_output.txt"
+#     ]
 
-    connection {
-      type        = "ssh"
-      user        = "ubuntu"
-      private_key = file(local_file.private-key.filename)
-      host        = self.public_ip
-    }
-  }
+#     connection {
+#       type        = "ssh"
+#       user        = "ubuntu"
+#       private_key = file(local_file.private-key.filename)
+#       host        = self.public_ip
+#     }
+#   }
 
-  provisioner "local-exec" {
-    command = "scp -i ${local_file.private-key.filename} ubuntu@${self.public_ip}:/tmp/sql_output.txt sql/sql_output.txt"
-  }
+#   provisioner "local-exec" {
+#     command = "scp -i ${local_file.private-key.filename} ubuntu@${self.public_ip}:/tmp/sql_output.txt sql/sql_output.txt"
+#   }
 
-  tags = {
-    Name = "sql-executor"
-  }
+#   tags = {
+#     Name = "sql-executor"
+#   }
 
-  depends_on = [aws_db_instance.vprofile-rds-mysql, local_file.private-key]
-}
+#   depends_on = [aws_db_instance.vprofile-rds-mysql, local_file.private-key]
+# }
 
 
 resource "aws_security_group" "mysql-client-sg" {
@@ -301,7 +301,7 @@ resource "aws_elastic_beanstalk_environment" "vprofile_app_prod" {
   name                = "vprofile-app-prod"
   application         = aws_elastic_beanstalk_application.vprofile_app.name
   solution_stack_name = "64bit Amazon Linux 2023 v4.3.0 running Corretto 21"
-  cname_prefix        = "vprofile-app-prod"
+  cname_prefix        = "vprofile-mark-abc123"
 
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
@@ -330,13 +330,14 @@ resource "aws_elastic_beanstalk_environment" "vprofile_app_prod" {
   setting {
     namespace = "aws:ec2:vpc"
     name      = "VPCId"
-    value     = "vpc-12345678" # Replace with your VPC ID
+    value     = data.aws_vpc.default.id
   }
 
   setting {
     namespace = "aws:ec2:vpc"
     name      = "Subnets"
-    value     = "subnet-12345678,subnet-23456789,subnet-34567890,subnet-45678901,subnet-56789012" # Replace with your Subnet IDs
+    #exclude the subnet that is not available us-east-1e
+    value     = join(",", [for id in data.aws_subnets.all.ids : id if id != data.aws_subnet.exclude.id])
   }
 
   setting {
@@ -426,8 +427,8 @@ resource "aws_elastic_beanstalk_environment" "vprofile_app_prod" {
   setting {
     namespace = "aws:elasticbeanstalk:environment:process:default"
     name      = "LoadBalancerSubnets"
-    value     = "subnet-12345678,subnet-23456789,subnet-34567890,subnet-45678901,subnet-56789012" # Replace with your Subnet IDs
-  }
+    value     = join(",", data.aws_subnets.all.ids)
+   }
 
   tags = {
     Name    = "vproapp"

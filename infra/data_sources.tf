@@ -26,6 +26,17 @@ data "aws_subnets" "all" {
   }
 }
 
+data "aws_subnet" "exclude" {
+  filter {
+    name   = "availability-zone"
+    values = ["us-east-1e"]
+  }
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+}
+
 data "aws_subnet" "single" {
   id = data.aws_subnets.all.ids[0]  # Manually specify one subnet from the list
 }
