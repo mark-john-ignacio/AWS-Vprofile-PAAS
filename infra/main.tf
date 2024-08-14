@@ -496,5 +496,5 @@ resource "aws_security_group_rule" "allow_eb_to_backend" {
 
 resource "aws_s3_bucket_acl" "vprofile_app_prod_acl" {
   bucket = data.aws_s3_bucket.vprofile_app_prod_bucket.id
-  acl    = "bucket-owner-full-control"
+  acl    = "private"
 }

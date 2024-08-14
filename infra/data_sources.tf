@@ -62,7 +62,15 @@ data "aws_ami" "ubuntu" {
   }
 }
 
+data "aws_caller_identity" "current" {}
 
 data "aws_s3_bucket" "vprofile_app_prod_bucket" {
-  bucket = "elasticbeanstalk-${aws_elastic_beanstalk_environment.vprofile_app_prod.region}-${data.aws_elastic_beanstalk_environment.vprofile_app_prod.environment_id}"
+  bucket = "elasticbeanstalk-${var.aws_region}-${data.aws_caller_identity.current.account_id}"
+}
+
+data "aws_security_group" "eb_instances_sg" {
+  filter {
+    name   = "group-name"
+    values = ["elasticbeanstalk-sg"]
+  }
 }
