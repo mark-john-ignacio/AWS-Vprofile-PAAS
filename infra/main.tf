@@ -415,7 +415,7 @@ resource "aws_elastic_beanstalk_environment" "vprofile_app_prod" {
   setting {
     namespace = "aws:elasticbeanstalk:environment:process:default"
     name      = "HealthCheckPath"
-    value     = "/"
+    value     = "/login"
   }
 
   setting {
@@ -459,9 +459,37 @@ resource "aws_elastic_beanstalk_environment" "vprofile_app_prod" {
     name      = "LoadBalancerSubnets"
     value     = join(",", [for id in data.aws_subnets.all.ids : id if id != data.aws_subnet.exclude.id])
    }
+  
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:default"
+    name      = "ListenerProtocol"
+    value     = "HTTPS"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:default"
+    name      = "ListenerPort"
+    value     = "443"
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:default"
+    name      = "SSLCertificateId"
+    value     = "arn:aws:acm:us-east-1:010526260632:certificate/0e73b116-7f6b-4f4b-95d7-ee512bd84279"
+  }
 
   tags = {
     Name    = "vproapp"
     Project = "vprofile-saas"
   }
+}
+
+resource "aws_security_group_rule" "allow_eb_to_backend" {
+  type              = "ingress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  security_group_id = aws_security_group.vprofile-backend-SG.id
+  source_security_group_id = aws_elastic_beanstalk_environment.vprofile_app_prod.instances[0].security_groups[0]
+  description       = "Allow all traffic from Elastic Beanstalk instances security group"
 }

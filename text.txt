@@ -75,3 +75,41 @@ Rolling updates and deployments
 Deployment Policy Rolling
 Batch size: Percentage
 50 percent instance at a time
+
+
+//129 Update on security group
+get the s3 created by the elastic beanstalk
+edit object ownership
+ACLs enabled
+
+On the Elastic Beanstalk vprofile_app
+Edit instance traffic and scaling
+
+Processes
+Edit name:default
+Health check
+Path: /login
+
+Sessions
+session stickiness: enabled
+save
+
+On Listeners
+Add listener
+Port: 443
+Protocol: HTTPS
+SSL certificate: arn:aws:acm:us-east-1:010526260632:certificate/0e73b116-7f6b-4f4b-95d7-ee512bd84279
+Default process: default
+save
+
+click Apply
+
+Find instance security group id of the vprofile-app Instances created by the Elastic Beanstalk
+
+Find vprofile-backend-sg
+edit inbound rules
+add rule
+all traffic
+source: security group id of the vprofile-app Instances created by the Elastic Beanstalk
+description: allow all traffic from elastic beanstalk instances security group
+save
