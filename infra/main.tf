@@ -490,7 +490,7 @@ resource "aws_security_group_rule" "allow_eb_to_backend" {
   to_port           = 0
   protocol          = "-1"
   security_group_id = aws_security_group.vprofile-backend-SG.id
-  source_security_group_id = "sg-0c342b5d257408d55" // Elastic Beanstalk instances security group hardcoded
+  source_security_group_id = data.aws_security_group.eb_instances_sg.id // Elastic Beanstalk instances security group hardcoded
   description       = "Allow all traffic from Elastic Beanstalk instances security group"
 }
 
