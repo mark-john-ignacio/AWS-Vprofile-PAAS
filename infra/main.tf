@@ -493,3 +493,8 @@ resource "aws_security_group_rule" "allow_eb_to_backend" {
   source_security_group_id = aws_elastic_beanstalk_environment.vprofile_app_prod.instances[0].security_groups[0]
   description       = "Allow all traffic from Elastic Beanstalk instances security group"
 }
+
+resource "aws_s3_bucket_acl" "vprofile_app_prod_acl" {
+  bucket = data.aws_s3_bucket.vprofile_app_prod_bucket.id
+  acl    = "bucket-owner-full-control"
+}

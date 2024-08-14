@@ -61,3 +61,12 @@ data "aws_ami" "ubuntu" {
     values = ["true"]
   }
 }
+
+
+data "aws_elastic_beanstalk_environment" "vprofile_app_prod" {
+  name = "vprofile-app-prod"
+}
+
+data "aws_s3_bucket" "vprofile_app_prod_bucket" {
+  bucket = "elasticbeanstalk-${data.aws_elastic_beanstalk_environment.vprofile_app_prod.region}-${data.aws_elastic_beanstalk_environment.vprofile_app_prod.environment_id}"
+}
