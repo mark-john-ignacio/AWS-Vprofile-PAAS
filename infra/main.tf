@@ -215,7 +215,8 @@ resource "aws_instance" "sql_executor" {
       "sudo apt-get update -y",
       "sudo apt-get install -y mysql-client",
       "mysql -h ${aws_db_instance.vprofile-rds-mysql.address} -u ${aws_db_instance.vprofile-rds-mysql.username} -p${random_password.rds_password.result} ${aws_db_instance.vprofile-rds-mysql.db_name} < /tmp/file.sql",
-      "mysql -h ${aws_db_instance.vprofile-rds-mysql.address} -u ${aws_db_instance.vprofile-rds-mysql.username} -p${random_password.rds_password.result} -e 'SHOW TABLES;' ${aws_db_instance.vprofile-rds-mysql.db_name} > /tmp/sql_output.txt"
+      "mysql -h ${aws_db_instance.vprofile-rds-mysql.address} -u ${aws_db_instance.vprofile-rds-mysql.username} -p${random_password.rds_password.result} -e 'SHOW TABLES;' ${aws_db_instance.vprofile-rds-mysql.db_name} > /tmp/sql_output.txt",
+      "cat /tmp/sql_output.txt"
     ]
 
     connection {
@@ -224,10 +225,6 @@ resource "aws_instance" "sql_executor" {
       private_key = file(local_file.private-key.filename)
       host        = self.public_ip
     }
-  }
-
-  provisioner "local-exec" {
-    command = "scp -i ${local_file.private-key.filename} ubuntu@${self.public_ip}:/tmp/sql_output.txt sql/sql_output.txt"
   }
 
   tags = {
