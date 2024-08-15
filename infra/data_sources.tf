@@ -68,9 +68,9 @@ data "aws_s3_bucket" "vprofile_app_prod_bucket" {
   bucket = "elasticbeanstalk-${var.aws_region}-${data.aws_caller_identity.current.account_id}"
 }
 
-data "aws_security_group" "eb_instances_sg" {
-  filter {
-    name   = "group-name"
-    values = ["awseb-e-kzgxephscn-stack-AWSEBSecurityGroup-cmz3mdHl6RsU"]
-  }
-}
+# data "aws_security_group" "eb_instances_sg" {
+#   filter {
+#     name   = "group-name"
+#     values = ["awseb-e-kzgxephscn-stack-AWSEBSecurityGroup-cmz3mdHl6RsU"]
+#   }
+# }

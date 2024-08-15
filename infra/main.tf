@@ -484,17 +484,21 @@ resource "aws_elastic_beanstalk_environment" "vprofile_app_prod" {
   }
 }
 
-resource "aws_security_group_rule" "allow_eb_to_backend" {
-  type              = "ingress"
-  from_port         = 0
-  to_port           = 0
-  protocol          = "-1"
-  security_group_id = aws_security_group.vprofile-backend-SG.id
-  source_security_group_id = data.aws_security_group.eb_instances_sg.id // Elastic Beanstalk instances security group hardcoded
-  description       = "Allow all traffic from Elastic Beanstalk instances security group"
-}
+# resource "aws_security_group_rule" "allow_eb_to_backend" {
+#   type              = "ingress"
+#   from_port         = 0
+#   to_port           = 0
+#   protocol          = "-1"
+#   security_group_id = aws_security_group.vprofile-backend-SG.id
+#   source_security_group_id = data.aws_security_group.eb_instances_sg.id // Elastic Beanstalk instances security group hardcoded
+#   description       = "Allow all traffic from Elastic Beanstalk instances security group"
+#   depends_on = [ aws_elastic_beanstalk_environment.vprofile_app_prod ]
+# }
 
 resource "aws_s3_bucket_acl" "vprofile_app_prod_acl" {
   bucket = data.aws_s3_bucket.vprofile_app_prod_bucket.id
   acl    = "private"
+
+  depends_on = [ aws_elastic_beanstalk_application.vprofile_app, aws_elastic_beanstalk_environment.vprofile_app_prod ]
 }
+
