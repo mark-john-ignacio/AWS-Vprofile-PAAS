@@ -29,3 +29,14 @@ host: in console in amazon elasticache>Memcached caches
 find vprofile
 example:
 vprofile-elasticache-svc.grob8j.cfg.use1.cache.amazonaws.com:11211
+
+mvn -version on terminal
+mvn install
+
+war file is in target/
+
+Goto console elastic beanstalk, and upload and deploy war file with preferred version name
+
+wait for it to be deployed
+
+use beanstalk domain to cname to your domain
