@@ -1,68 +1,31 @@
-# vProfile Lift and Shift Project
+Notes: sql_executor and resource "aws_security_group_rule" "allow_eb_to_backend" are commented out because they cause issues if they are ran together withall the other resources
 
-This project is a Terraform configuration for deploying a multi-tier application on AWS. The application consists of a frontend, application servers, and backend services including a database, Memcached, and RabbitMQ.
+Change credential path on provider if using aws credentials to run terraform
 
-## Architecture
+after beanstalk is active, clone https://github.com/hkhcoder/vprofile-project.git
+go to src, main, resources > application.properties and changethe credentials of 
+rds
+memcached
+rabbitmq that will be created from this terraform that is saved on the key folder
+check the aws console for the url and host and port
 
-The architecture consists of the following components:
-- **VPC**: A Virtual Private Cloud to host all resources.
-- **Security Groups**: To control inbound and outbound traffic to instances.
-- **EC2 Instances**: For the database, Memcached, RabbitMQ, and application servers.
-- **IAM Role**: For accessing S3 buckets.
-- **Load Balancer**: An Application Load Balancer (ALB) to distribute traffic.
-- **Auto Scaling Group**: To manage the scaling of application servers.
+rabbitmq
+username = "rabbit"
+password = found in key folder
+address = can be found in console amazon mq endpoint
+example:
+amqps://b-403fbcae-9d22-45fa-9a76-b103adf16703.mq.us-east-1.amazonaws.com:5671
+port:5671
 
-## Components
+jdbc
+username = admin
+password = found in key folder
+jdbc url = endpoint found in console rds
+example: vprofile-rds-mysql.c9qgosauahei.us-east-1.rds.amazonaws.com
+port:3306
 
-1. **VPC**: A default VPC is used.
-2. **Security Groups**:
-   - `vprofile-ELB-SG`: For the Load Balancer.
-   - `vprofile-app-sg`: For the application servers.
-   - `vprofile-backend-sg`: For the backend services (database, Memcached, RabbitMQ).
-3. **EC2 Instances**:
-   - `vprofile-db-01`: MySQL database server.
-   - `vprofile-mc-01`: Memcached server.
-   - `vprofile-rmq-01`: RabbitMQ server.
-   - `vprofile-app-01`: Application server running Tomcat.
-4. **Load Balancer**:
-   - An Application Load Balancer (ALB) to distribute incoming traffic to the application servers.
-5. **Auto Scaling Group**:
-   - Manages the scaling of application servers based on demand.
-
-## Prerequisites
-
-- Terraform installed on your local machine.
-- AWS CLI configured with appropriate permissions.
-- An existing key pair in AWS for SSH access to instances.
-
-## Usage
-
-1. Clone the repository:
-   ```sh
-   git clone https://github.com/mark-john-ignacio/vprofile-lift-and-shift.git
-   cd vprofile-lift-and-shift
-   ```
-
-2. Initialize Terraform:
-   ```sh
-   terraform init
-   ```
-
-3. Apply the Terraform configuration:
-   ```sh
-   terraform apply
-   ```
-
-4. Confirm the apply action with `yes`.
-
-## Cleanup
-
-To destroy the infrastructure created by this Terraform configuration, run:
-```sh
-terraform destroy
-```
-
-## Diagram
-
-![Architecture Diagram](architecture-diagram.png)
-
+memcached
+host: in console in amazon elasticache>Memcached caches
+find vprofile
+example:
+vprofile-elasticache-svc.grob8j.cfg.use1.cache.amazonaws.com:11211
