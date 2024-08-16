@@ -191,50 +191,6 @@ resource "local_file" "rabbitmq_password_file" {
   filename = "${path.module}/key/rabbitmq_password.txt"
 }
 
-# resource "aws_instance" "sql_executor" {
-#   ami           = data.aws_ami.ubuntu.id
-#   instance_type = "t2.micro"
-#   key_name      = aws_key_pair.vprofile-bean-key.key_name
-#   subnet_id     = data.aws_subnet.single.id
-#   vpc_security_group_ids = [aws_security_group.mysql-client-sg.id]
-
-#   provisioner "file" {
-#     source      = "sql/db_backup.sql"
-#     destination = "/tmp/file.sql"
-
-#     connection {
-#       type        = "ssh"
-#       user        = "ubuntu"
-#       private_key = file(local_file.private-key.filename)
-#       host        = self.public_ip
-#     }
-#   }
-
-#   provisioner "remote-exec" {
-#     inline = [
-#       "sudo apt-get update -y",
-#       "sudo apt-get install -y mysql-client",
-#       "mysql -h ${aws_db_instance.vprofile-rds-mysql.address} -u ${aws_db_instance.vprofile-rds-mysql.username} -p${random_password.rds_password.result} ${aws_db_instance.vprofile-rds-mysql.db_name} < /tmp/file.sql",
-#       "mysql -h ${aws_db_instance.vprofile-rds-mysql.address} -u ${aws_db_instance.vprofile-rds-mysql.username} -p${random_password.rds_password.result} -e 'SHOW TABLES;' ${aws_db_instance.vprofile-rds-mysql.db_name} > /tmp/sql_output.txt",
-#       "cat /tmp/sql_output.txt"
-#     ]
-
-#     connection {
-#       type        = "ssh"
-#       user        = "ubuntu"
-#       private_key = file(local_file.private-key.filename)
-#       host        = self.public_ip
-#     }
-#   }
-
-#   tags = {
-#     Name = "sql-executor"
-#   }
-
-#   depends_on = [aws_db_instance.vprofile-rds-mysql, local_file.private-key]
-# }
-
-
 resource "aws_security_group" "mysql-client-sg" {
   name = "mysql-client-sg"
   description = "Security group for MySQL client"
@@ -484,6 +440,58 @@ resource "aws_elastic_beanstalk_environment" "vprofile_app_prod" {
   }
 }
 
+
+resource "aws_s3_bucket_acl" "vprofile_app_prod_acl" {
+  bucket = data.aws_s3_bucket.vprofile_app_prod_bucket.id
+  acl    = "private"
+
+  depends_on = [ aws_elastic_beanstalk_application.vprofile_app, aws_elastic_beanstalk_environment.vprofile_app_prod ]
+}
+
+# these resources are commented out because they should only be ran after all the resources above have been created
+# resource "aws_instance" "sql_executor" {
+#   ami           = data.aws_ami.ubuntu.id
+#   instance_type = "t2.micro"
+#   key_name      = aws_key_pair.vprofile-bean-key.key_name
+#   subnet_id     = data.aws_subnet.single.id
+#   vpc_security_group_ids = [aws_security_group.mysql-client-sg.id]
+
+#   provisioner "file" {
+#     source      = "sql/db_backup.sql"
+#     destination = "/tmp/file.sql"
+
+#     connection {
+#       type        = "ssh"
+#       user        = "ubuntu"
+#       private_key = file(local_file.private-key.filename)
+#       host        = self.public_ip
+#     }
+#   }
+
+#   provisioner "remote-exec" {
+#     inline = [
+#       "sudo apt-get update -y",
+#       "sudo apt-get install -y mysql-client",
+#       "mysql -h ${aws_db_instance.vprofile-rds-mysql.address} -u ${aws_db_instance.vprofile-rds-mysql.username} -p${random_password.rds_password.result} ${aws_db_instance.vprofile-rds-mysql.db_name} < /tmp/file.sql",
+#       "mysql -h ${aws_db_instance.vprofile-rds-mysql.address} -u ${aws_db_instance.vprofile-rds-mysql.username} -p${random_password.rds_password.result} -e 'SHOW TABLES;' ${aws_db_instance.vprofile-rds-mysql.db_name} > /tmp/sql_output.txt",
+#       "cat /tmp/sql_output.txt"
+#     ]
+
+#     connection {
+#       type        = "ssh"
+#       user        = "ubuntu"
+#       private_key = file(local_file.private-key.filename)
+#       host        = self.public_ip
+#     }
+#   }
+
+#   tags = {
+#     Name = "sql-executor"
+#   }
+
+#   depends_on = [aws_db_instance.vprofile-rds-mysql, local_file.private-key]
+# }
+
 # resource "aws_security_group_rule" "allow_eb_to_backend" {
 #   type              = "ingress"
 #   from_port         = 0
@@ -494,11 +502,3 @@ resource "aws_elastic_beanstalk_environment" "vprofile_app_prod" {
 #   description       = "Allow all traffic from Elastic Beanstalk instances security group"
 #   depends_on = [ aws_elastic_beanstalk_environment.vprofile_app_prod ]
 # }
-
-resource "aws_s3_bucket_acl" "vprofile_app_prod_acl" {
-  bucket = data.aws_s3_bucket.vprofile_app_prod_bucket.id
-  acl    = "private"
-
-  depends_on = [ aws_elastic_beanstalk_application.vprofile_app, aws_elastic_beanstalk_environment.vprofile_app_prod ]
-}
-
