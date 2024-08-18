@@ -3,14 +3,14 @@ data "http" "my_ip" {
 }
 
 data "aws_vpc" "default" {
-  id = "vpc-048c313786f7c4c19"
+  id      = "vpc-048c313786f7c4c19"
   default = true
 }
 
 data "aws_availability_zones" "available" {
   state = "available"
   filter {
-    name = "region-name"
+    name   = "region-name"
     values = ["us-east-1"]
   }
 }
@@ -21,7 +21,7 @@ data "aws_subnets" "all" {
     values = [data.aws_vpc.default.id]
   }
   filter {
-    name = "availability-zone"
+    name   = "availability-zone"
     values = data.aws_availability_zones.available.names
   }
 }
@@ -38,12 +38,12 @@ data "aws_subnet" "exclude" {
 }
 
 data "aws_subnet" "single" {
-  id = data.aws_subnets.all.ids[0]  # Manually specify one subnet from the list
+  id = data.aws_subnets.all.ids[0] # Manually specify one subnet from the list
 }
 
 data "aws_ami" "ubuntu" {
   most_recent = true
-  owners      = ["099720109477"]  # Canonical's AWS account ID
+  owners      = ["099720109477"] # Canonical's AWS account ID
   filter {
     name   = "name"
     values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
@@ -71,6 +71,6 @@ data "aws_s3_bucket" "vprofile_app_prod_bucket" {
 data "aws_security_group" "eb_instances_sg" {
   filter {
     name   = "group-name"
-    values = ["awseb-e-mpvbmtv6ik-stack-AWSEBSecurityGroup-EqmnK752Hsz9"]
+    values = ["awseb-e-b5gwfbwkca-stack-AWSEBSecurityGroup-cfiOJU8AFNHC"]
   }
 }
