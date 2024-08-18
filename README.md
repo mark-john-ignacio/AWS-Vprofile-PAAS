@@ -3,7 +3,7 @@ Notes: sql_executor and resource "aws_security_group_rule" "allow_eb_to_backend"
 Change credential path on provider if using aws credentials to run terraform
 
 after beanstalk is active, clone https://github.com/hkhcoder/vprofile-project.git
-go to src, main, resources > application.properties and changethe credentials of 
+go to src, main, resources > application.properties and changethe credentials of
 rds
 memcached
 rabbitmq that will be created from this terraform that is saved on the key folder
@@ -40,3 +40,9 @@ Goto console elastic beanstalk, and upload and deploy war file with preferred ve
 wait for it to be deployed
 
 use beanstalk domain to cname to your domain
+
+update 2024-08-19
+used s3 for backend of terraform state on providers
+
+so if no s3 yet, create one and put name on providers backend
+key value is for the name of the file on s3
