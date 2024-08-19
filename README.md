@@ -77,5 +77,4 @@ terraform destroy
 Feel free to submit issues or pull requests for any improvements or bug fixes.
 
 ## License
-
-[Specify your license here]
+This project is licensed under the [MIT License](LICENSE). See the [LICENSE](LICENSE) file for more details.
