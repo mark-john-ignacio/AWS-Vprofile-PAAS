@@ -468,7 +468,7 @@ resource "aws_cloudfront_distribution" "vprofile_distribution" {
     custom_origin_config {
       http_port                = 80
       https_port               = 443
-      origin_protocol_policy   = "match-viewer"
+      origin_protocol_policy   = "http-only"
       origin_ssl_protocols     = ["TLSv1.2"]
     }
   }
@@ -476,7 +476,6 @@ resource "aws_cloudfront_distribution" "vprofile_distribution" {
   enabled             = true
   is_ipv6_enabled     = true
   comment             = "CloudFront distribution for vprofile application"
-  default_root_object = "index.html"
 
   aliases = ["vprofile2.markjohnignacio.xyz"]
 
