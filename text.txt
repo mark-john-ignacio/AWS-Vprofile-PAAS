@@ -113,3 +113,33 @@ all traffic
 source: security group id of the vprofile-app Instances created by the Elastic Beanstalk
 description: allow all traffic from elastic beanstalk instances security group
 save
+
+
+Creating Cloudfront distribution
+Origin domain: Elastic Balancer created by beanstalk vprofile_app
+Protocol: Match viewer using default ports
+Minimum Origin SSL Protocol TLSv1.2
+Viewer protocol policy
+HTTP and HTTPS
+
+Allowed HTTP methods
+GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE
+
+Cache key and origin requests
+Legacy cache settings
+Headers All
+query strings All
+Cookier All
+
+Web Application Firewall (WAF) 
+Do not enable security protections
+Price class
+Use all edge locations (best performance)
+
+Alternate domain name (CNAME) - optional
+vprofile.markjohnignacio.xyz
+
+Custom SSL certificate
+arn:aws:acm:us-east-1:010526260632:certificate/431c05e4-b0f0-4a7c-9410-fb5e9e8c54d6
+Security policy
+TLSv1

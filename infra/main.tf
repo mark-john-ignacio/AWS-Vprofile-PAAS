@@ -449,6 +449,65 @@ resource "aws_s3_bucket_acl" "vprofile_app_prod_acl" {
   depends_on = [aws_elastic_beanstalk_application.vprofile_app, aws_elastic_beanstalk_environment.vprofile_app_prod]
 }
 
+# CloudFront distribution
+resource "aws_cloudfront_distribution" "vprofile_distribution" {
+  origin {
+    domain_name = aws_elastic_beanstalk_environment.vprofile_app_prod.endpoint_url
+    origin_id   = "vprofileAppOrigin"
+
+    custom_origin_config {
+      http_port                = 80
+      https_port               = 443
+      origin_protocol_policy   = "match-viewer"
+      origin_ssl_protocols     = ["TLSv1.2"]
+    }
+  }
+
+  enabled             = true
+  is_ipv6_enabled     = true
+  comment             = "CloudFront distribution for vprofile application"
+  default_root_object = "index.html"
+
+  aliases = ["vprofile.markjohnignacio.xyz"]
+
+  default_cache_behavior {
+    allowed_methods        = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+    cached_methods         = ["GET", "HEAD"]
+    target_origin_id       = "vprofileAppOrigin"
+    viewer_protocol_policy = "allow-all"
+
+    forwarded_values {
+      query_string = true
+      cookies {
+        forward = "all"
+      }
+      headers = ["*"]
+    }
+
+    min_ttl                = 0
+    default_ttl            = 3600
+    max_ttl                = 86400
+  }
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+
+  viewer_certificate {
+    acm_certificate_arn            = "arn:aws:acm:us-east-1:010526260632:certificate/431c05e4-b0f0-4a7c-9410-fb5e9e8c54d6"
+    ssl_support_method             = "sni-only"
+    minimum_protocol_version       = "TLSv1"
+  }
+
+  price_class = "PriceClass_All"
+
+  tags = {
+    Name = "vprofile-distribution"
+  }
+}
+
 # these resources are commented out because they should only be ran after all the resources above have been created
 # resource "aws_instance" "sql_executor" {
 #   ami                    = data.aws_ami.ubuntu.id
