@@ -1,6 +1,3 @@
-Here is a properly formatted README for your project based on the provided context from [`README.md`](command:_github.copilot.openRelativePath?%5B%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2FE%3A%2FTerraform%2F122%20Vprofile%20PAAS%20and%20SAAS%2FREADME.md%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%5D "e:\Terraform\122 Vprofile PAAS and SAAS\README.md") and [`main.tf`](command:_github.copilot.openRelativePath?%5B%7B%22scheme%22%3A%22file%22%2C%22authority%22%3A%22%22%2C%22path%22%3A%22%2FE%3A%2FTerraform%2F122%20Vprofile%20PAAS%20and%20SAAS%2Finfra%2Fmain.tf%22%2C%22query%22%3A%22%22%2C%22fragment%22%3A%22%22%7D%5D "e:\Terraform\122 Vprofile PAAS and SAAS\infra\main.tf").
-
-```markdown
 # VProfile Project Infrastructure
 
 This repository contains the Terraform configuration files to set up the infrastructure for the VProfile project. The infrastructure includes an Elastic Beanstalk environment, RDS instance, ElastiCache cluster, and RabbitMQ broker.
