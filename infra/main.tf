@@ -182,6 +182,11 @@ resource "aws_mq_broker" "vprofile-rmq" {
     general = true
   }
 
+  lifecycle {
+    ignore_changes = [
+      engine_version,
+    ]
+  }
   tags = {
     Name = "vprofile-rmq"
   }
@@ -435,6 +440,11 @@ resource "aws_elastic_beanstalk_environment" "vprofile_app_prod" {
     value     = "arn:aws:acm:us-east-1:010526260632:certificate/0e73b116-7f6b-4f4b-95d7-ee512bd84279"
   }
 
+  lifecycle {
+    ignore_changes = [
+      setting,
+    ]
+  }
   tags = {
     Name    = "vproapp"
     Project = "vprofile-saas"
@@ -468,7 +478,7 @@ resource "aws_cloudfront_distribution" "vprofile_distribution" {
   comment             = "CloudFront distribution for vprofile application"
   default_root_object = "index.html"
 
-  aliases = ["vprofile.markjohnignacio.xyz"]
+  aliases = ["vprofile2.markjohnignacio.xyz"]
 
   default_cache_behavior {
     allowed_methods        = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
