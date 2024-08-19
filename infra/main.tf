@@ -182,11 +182,11 @@ resource "aws_mq_broker" "vprofile-rmq" {
     general = true
   }
 
-  lifecycle {
-    ignore_changes = [
-      engine_version,
-    ]
-  }
+  # lifecycle {
+  #   ignore_changes = [
+  #     engine_version,
+  #   ]
+  # }
   tags = {
     Name = "vprofile-rmq"
   }
@@ -440,11 +440,11 @@ resource "aws_elastic_beanstalk_environment" "vprofile_app_prod" {
     value     = "arn:aws:acm:us-east-1:010526260632:certificate/0e73b116-7f6b-4f4b-95d7-ee512bd84279"
   }
 
-  lifecycle {
-    ignore_changes = [
-      setting,
-    ]
-  }
+  # lifecycle {
+  #   ignore_changes = [
+  #     setting,
+  #   ]
+  # }
   tags = {
     Name    = "vproapp"
     Project = "vprofile-saas"
@@ -468,7 +468,7 @@ resource "aws_cloudfront_distribution" "vprofile_distribution" {
     custom_origin_config {
       http_port                = 80
       https_port               = 443
-      origin_protocol_policy   = "http-only"
+      origin_protocol_policy   = "match-viewer"
       origin_ssl_protocols     = ["TLSv1.2"]
     }
   }
