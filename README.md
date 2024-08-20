@@ -1,4 +1,4 @@
-# VProfile SaaS Infrastructure Project
+# VProfile PaaS Infrastructure Project
 
 This Terraform project sets up the infrastructure for the VProfile application on AWS using PaaS (platform-as-a-service) products. It includes various components such as RDS, ElastiCache, Amazon MQ, Elastic Beanstalk, and CloudFront.
 
