@@ -2,6 +2,10 @@
 
 This Terraform project sets up the infrastructure for the VProfile SaaS application on AWS. It includes various components such as RDS, ElastiCache, Amazon MQ, Elastic Beanstalk, and CloudFront.
 
+## Architecture Diagram
+
+![Architecture Diagram](diagram/architecture-diagram.png)
+
 ## Project Structure
 
 - `data_sources.tf`: Defines data sources for VPC, subnets, AMIs, and other existing resources.
