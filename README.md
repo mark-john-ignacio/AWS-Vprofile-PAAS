@@ -15,6 +15,8 @@ This Terraform project sets up the infrastructure for the VProfile SaaS applicat
 - AWS CLI configured with appropriate credentials
 - Terraform installed (version compatible with AWS provider >= 4.9.0)
 - An S3 bucket for Terraform state (specified in `provider.tf`)
+- A domain name hosted in Route 53 or another DNS provider
+- An SSL certificate in ACM for the domain name
 
 ## Key Components
 

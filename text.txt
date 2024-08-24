@@ -143,3 +143,12 @@ Custom SSL certificate
 arn:aws:acm:us-east-1:010526260632:certificate/431c05e4-b0f0-4a7c-9410-fb5e9e8c54d6
 Security policy
 TLSv1
+
+
+## Prerequisites
+
+- AWS CLI configured with appropriate credentials
+- Terraform installed (version compatible with AWS provider >= 4.9.0)
+- An S3 bucket for Terraform state (specified in `provider.tf`)
+- A domain name hosted in Route 53 or another DNS provider
+- An SSL certificate in ACM for the domain name
